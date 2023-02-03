@@ -21,25 +21,52 @@
 
     export let parkFields = [];
 
-    const customContent = new CustomContent({
-        creator: (function (graphic) {
-            let amenitiesList = [];
-            // @ts-ignore
-            for (const [key, value] of Object.entries(graphic.attributes)) {
-                if (value === "YES") {
-                    amenitiesList.push(key);
-                }
+    const parkAmenitiesList = (feature) => {
+        let amenitiesList = [];
+        for (const [key, value] of Object.entries(feature.graphic.attributes)) {
+            if (value === "YES") {
+                amenitiesList.push(key);
             }
-            let amenities = amenitiesList.join(", ");
-            return amenities;
-        })
-    });
+        }
+        let address = feature.graphic.attributes.ADDRESS;
+        let amenities = amenitiesList.sort().join(", ");
+        let url = feature.graphic.attributes.URL;
+
+        let parksPopup = "";
+        //build popup html
+        if (url.length > 0) {
+            parksPopup = `
+                <div style="text-align:left;">
+                    <h6 class="font-weight: bolder;">${address}</h6>
+                    <div>${amenities}</div>
+                    <h6><a href="${url}" target="_blank" rel="noreferrer" style="font-style: italic;">More Info</a></h6>
+                </div>
+            `;
+        } else {
+            parksPopup = `
+                <div style="text-align:left;">
+                    <h6>${address}</h6>
+                    <div>${amenities}</div>
+                </div>
+            `;
+        }
+
+        return parksPopup;
+    };
 
     // 2. Create the PopupTemplate and reference the content elements
     const popupTemplate = new PopupTemplate({
         outFields: ["*"],
         title: "{name}",
-        content: [customContent]
+        fieldInfos: [
+            {
+                fieldName: "ADDRESS",
+                label: "Address",
+                visible: true,
+            },
+        ],
+        content: parkAmenitiesList,
+        
     });
     const parksLayer = new FeatureLayer({
         url: "https://services2.arcgis.com/tQaXW7Zb1Vphzvgd/arcgis/rest/services/Parks/FeatureServer/0",
@@ -185,15 +212,16 @@
                 }, 1000);
 
                 //show timer
+                const timerStyle = "width: 7vw; padding:4px 2px;"
                 const timerDiv = document.createElement("div");
                 timerDiv.id = "timerDiv";
                 timerDiv.classList.add("esri-widget");
-                timerDiv.innerHTML = `<div id="timerDiv" class="esri-widget" style="width: 4vw; padding:.25rem 0;"><span>: ${timeToRun}</span></div>`;
+                timerDiv.innerHTML = `<div id="timerDiv" class="esri-widget" style="${timerStyle}"><span>: ${timeToRun}</span></div>`;
                 view.ui.add(timerDiv, "bottom-right");
 
                 //update timer
                 const updateTimer = () => {
-                    timerDiv.innerHTML = `<div id="timerDiv" class="esri-widget" style="width: 4vw; padding:.25rem 0;"><span>: ${timeToRun}</span></div>`;
+                    timerDiv.innerHTML = `<div id="timerDiv" class="esri-widget" style="${timerStyle}"><span>: ${timeToRun}</span></div>`;
                 }
                 
                 //remove timer
@@ -224,6 +252,15 @@
             maxZoom: 15,
             rotationEnabled: false,
           },
+          popup: {
+            dockEnabled: true,
+            dockOptions: {
+              buttonEnabled: false,
+              breakpoint: false,
+              position: "top-right",
+            },
+            collapseEnabled: false,
+          },
         });
         /* view.watch("center", (center) => {
             const { latitude, longitude } = center;
@@ -239,7 +276,7 @@
                 const optionStyle = "display:inline-flex;align-items:center;"
                 const filterOptions = parkFields.sort().map((attribute) => {
                     if(attribute !== "OBJECTID" && attribute !== "FACILITYSITEID" && attribute !== "NAME" && attribute !== "REGION" && attribute !== "URL")
-                    return `<div style="${optionStyle}">
+                    return `<div style="${optionStyle}" class="filterOption">
                                 <input type="checkbox" id="${attribute}" name="interest" value="${attribute}" />
                                 <label for="${attribute}">${attribute}</label>
                             </div>`;

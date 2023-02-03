@@ -11,7 +11,7 @@
     const summarizeAmenities = (data) => {
       //console.log('parks data', data);
       let amenities = parkFields
-        .filter(field => field !== "OBJECTID" && field !== "FACILITYSITEID" && field !== "NAME" && field !== "REGION" && field !== "URL")
+        .filter(field => field !== "OBJECTID" && field !== "FACILITYSITEID" && field !== "ADDRESS" && field !== "NAME" && field !== "REGION" && field !== "URL")
 
       amenities.forEach(amenity => {
           amenitySummaries[amenity] = 0;
