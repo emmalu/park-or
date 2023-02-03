@@ -24,7 +24,7 @@
     const customContent = new CustomContent({
         creator: (function (graphic) {
         // this returns either string, HTMLElement, Widget, or Promise
-            console.log(graphic);
+            //console.log(graphic);
             const amenities = [];
             let amenitiesList = "";
             // @ts-ignore
@@ -141,7 +141,7 @@
         playButton.setAttribute("disabled", "disabled");
         
         layer.queryFeatures().then((results) => {
-            console.log(results.features.length);
+            //results.features.length);
             let featureCount = results.features.length;
             if (featureCount > 0) {
                 let timeToRun = (featureCount > 30) ? Math.floor(results.features.length / 3) : featureCount; //seconds
@@ -234,7 +234,7 @@
         }); */
         view.when(async () => {
             const parksLayerView = await view.whenLayerView(parksLayer);
-            console.log("park layer view: ", parksLayerView);
+            //console.log("park layer view: ", parksLayerView);
             
             parksLayerView.when(() => {
                 
@@ -256,13 +256,17 @@
                 const filterParksLayer = (parksLayerView, filterInputs) => {
                     return () => {
                         const checkedInputs = Array.from(filterInputs).filter((input) => input.checked);
-                        const checkedInputsValues = checkedInputs.map((input) => input.value);
-                        const checkedInputsValuesString = checkedInputsValues.join(" = 'YES' OR ");
-                        const checkedInputsValuesQuery = `${checkedInputsValuesString} = 'YES'`;
-                        //console.log(checkedInputsValuesQuery);
-                        parksLayerView.filter = {
-                            where: checkedInputsValuesQuery
-                        };
+                        if(checkedInputs.length > 0){
+                            const checkedInputsValues = checkedInputs.map((input) => input.value);
+                            const checkedInputsValuesString = checkedInputsValues.join(" = 'YES' OR ");
+                            const checkedInputsValuesQuery = `${checkedInputsValuesString} = 'YES'`;
+                            //console.log(checkedInputsValuesQuery);
+                            parksLayerView.filter = {
+                                where: checkedInputsValuesQuery
+                            };
+                        } else {
+                            parksLayerView.filter = null;
+                        }
                     }
                 }
                 //add event listener to each filter input
@@ -275,7 +279,7 @@
                 const playButton = document.getElementById("playButton");
                 playButton.removeAttribute("disabled");
                 playButton.addEventListener("click", () => {
-                    console.log("Play button clicked!");
+                    //console.log("Play button clicked!");
                     triggerParksLottery(view, parksLayerView);
                 });                
                 
@@ -320,7 +324,6 @@
                     }).sort((a, b) => b.count - a.count);
                 }); */
                 //update regional stats
-                console.log("update parks data!");
             },
             destroy() {
                 view.container = null;

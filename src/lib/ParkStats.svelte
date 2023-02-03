@@ -9,7 +9,7 @@
     let amenitySummaries = {};
         
     const summarizeAmenities = (data) => {
-      console.log('parks data', data);
+      //console.log('parks data', data);
       let amenities = parkFields
         .filter(field => field !== "OBJECTID" && field !== "FACILITYSITEID" && field !== "NAME" && field !== "REGION" && field !== "URL")
 
@@ -22,7 +22,7 @@
             }
           });
       });
-      console.log(amenitySummaries);
+      //console.log(amenitySummaries);
     }
     const unsubscribe = allParkAttributes.subscribe(value => {
         data = value;
