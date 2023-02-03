@@ -23,18 +23,15 @@
 
     const customContent = new CustomContent({
         creator: (function (graphic) {
-        // this returns either string, HTMLElement, Widget, or Promise
-            //console.log(graphic);
-            const amenities = [];
-            let amenitiesList = "";
+            let amenitiesList = [];
             // @ts-ignore
             for (const [key, value] of Object.entries(graphic.attributes)) {
                 if (value === "YES") {
-                    amenitiesList += `<span>${key}</span>`;
+                    amenitiesList.push(key);
                 }
             }
-            debugger;
-            return amenitiesList;
+            let amenities = amenitiesList.join(", ");
+            return amenities;
         })
     });
 
@@ -234,10 +231,8 @@
         }); */
         view.when(async () => {
             const parksLayerView = await view.whenLayerView(parksLayer);
-            //console.log("park layer view: ", parksLayerView);
             
             parksLayerView.when(() => {
-                
                 //populate filter select options from park fields
                 const filterSelect = document.getElementById("filterOptions");
                 let filterSelectHTML = '<fieldset><legend>Filter by Amenities</legend>';
@@ -252,6 +247,18 @@
                 filterSelectHTML += filterOptions.join("");
                 filterSelectHTML += '</legend></fieldset>';
                 filterSelect.innerHTML = filterSelectHTML;
+                
+                //get filter button
+                const filterButton = document.getElementById("filterButton");
+                //add event listener to filter button
+                filterButton.addEventListener("click", () => {
+                    //clear all inputs
+                    const filterInputs = document.querySelectorAll("input[name='interest']");
+                    for (const input of filterInputs) {
+                        // @ts-ignore
+                        input.checked = false;
+                    }                    
+                });
 
                 const filterParksLayer = (parksLayerView, filterInputs) => {
                     return () => {
@@ -336,14 +343,14 @@
 <div class="app-header">
     <div>
         <h1>PARK-Or</h1>
-        <p>
+        <p class="desktop">
             Where <em>every</em> park is a winner!
         </p>
     </div>
     <div class="centered">
         <div class="esri-widget hidden filters" id="filterOptions"></div>
     </div>
-    <div class="column">
+    <div class="column buttons">
         <div>
             <button id="playButton" type="button" disabled><img src={playSVG} alt="play icon" /></button>
         </div>
@@ -360,6 +367,7 @@
     <div class="centerText">{@html centerText}</div>
 {/if}
 <p id="arrow" class="animate">&downarrow;</p>
+
 <style>
     @import "@arcgis/core/assets/esri/themes/dark/main.css";
 
@@ -416,6 +424,21 @@
         60% {
             transform: translateY(-15px);
         }
+    }
+
+    @media only screen and (max-width: 600px) {
+        .app-header{
+            flex-direction: column;
+        }
+        .desktop {
+            display: none;
+        }
+        .buttons{
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+        
     }
 
 </style>

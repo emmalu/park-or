@@ -40,7 +40,7 @@
 
 
 {#if amenitySummaries}
-    <div class="chart-section">
+    <div class="chart-section desktop">
         <h3>Park Amenities</h3>
         <div class="chart">
         {#each Object.entries(amenitySummaries) as [name, count]}
@@ -79,5 +79,12 @@
         padding: 3px;
         margin: 1px;
         color: white;
+    }
+
+    @media only screen and (max-width: 600px) {
+        .desktop {
+            display: none;
+        }
+        
     }
 </style>
