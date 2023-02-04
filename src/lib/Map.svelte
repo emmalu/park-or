@@ -373,7 +373,7 @@
 <div class="app-header">
     <div>
         <h1>PARK-Or</h1>
-        <p class="discover"><span class="desktop-hidden">Play & Discover | </span>Every Park's a Winner</p>
+        <p class="discover"><span class="desktop-hidden">Play & Discover<hr/></span>Every Park's a Winner</p>
     </div>
     <div id="filterOptions"></div>
     <div class="button-container">
