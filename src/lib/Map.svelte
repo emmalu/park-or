@@ -1,5 +1,5 @@
 <script>
-    import playSVG from "./../assets/play.svg";
+    import playSVG from "./../assets/play-fill.svg";
     import filterSVG from "./../assets/filter.svg";
     import { allParkAttributes, regionalStats } from "../data/stores";
 
@@ -160,8 +160,8 @@
     }
     
     const triggerParksLottery = (view, layer) => {
-        const playButton = document.getElementById("playButton");
         //add disabled attribute to prevent excessive play :)
+        const playButton = document.getElementById("playButton");
         playButton.setAttribute("disabled", "disabled");
         
         layer.queryFeatures().then((results) => {
@@ -186,7 +186,7 @@
                     });
                     //create vector symbol
                     const playSymbol = new SimpleMarkerSymbol({
-                        color: [0, 0, 0, 0.85],
+                        color: [201, 85, 28, 0.75],
                         outline: null
                     });
                     const parkGraphic = new Graphic({
@@ -212,7 +212,7 @@
                 }, 1000);
 
                 //show timer
-                const timerStyle = "width: 7vw; padding:4px 2px;"
+                const timerStyle = "width: 8vw; padding:4px 2px;"
                 const timerDiv = document.createElement("div");
                 timerDiv.id = "timerDiv";
                 timerDiv.classList.add("esri-widget");
@@ -275,20 +275,21 @@
                 let filterSelectHTML = '<fieldset><legend>Filter by Amenities</legend>';
                 const optionStyle = "display:inline-flex;align-items:center;"
                 const filterOptions = parkFields.sort().map((attribute) => {
-                    if(attribute !== "OBJECTID" && attribute !== "FACILITYSITEID" && attribute !== "NAME" && attribute !== "REGION" && attribute !== "URL")
+                    if(attribute !== "OBJECTID" && attribute !== "FACILITYSITEID" && attribute !== "NAME" && attribute !== "ADDRESS" && attribute !== "REGION" && attribute !== "URL")
                     return `<div style="${optionStyle}" class="filterOption">
                                 <input type="checkbox" id="${attribute}" name="interest" value="${attribute}" />
                                 <label for="${attribute}">${attribute}</label>
                             </div>`;
                 });
                 filterSelectHTML += filterOptions.join("");
-                filterSelectHTML += '</legend></fieldset>';
+                filterSelectHTML += '</legend></fieldset><small><a href="#" id="resetFilterButton">Reset Filters</a></small>';
                 filterSelect.innerHTML = filterSelectHTML;
                 
-                //get filter button
-                const filterButton = document.getElementById("filterButton");
+
+                //get reset button
+                const resetButton = document.getElementById("resetFilterButton");
                 //add event listener to filter button
-                filterButton.addEventListener("click", () => {
+                resetButton.addEventListener("click", () => {
                     //clear all inputs
                     const filterInputs = document.querySelectorAll("input[name='interest']");
                     for (const input of filterInputs) {
@@ -296,6 +297,7 @@
                         input.checked = false;
                     }                    
                 });
+
 
                 const filterParksLayer = (parksLayerView, filterInputs) => {
                     return () => {
@@ -323,7 +325,6 @@
                 const playButton = document.getElementById("playButton");
                 playButton.removeAttribute("disabled");
                 playButton.addEventListener("click", () => {
-                    //console.log("Play button clicked!");
                     triggerParksLottery(view, parksLayerView);
                 });                
                 
@@ -359,14 +360,6 @@
         return {
             view,
             update() {
-                /* parksLayer.queryFeatures(query).then((results) => {
-                    let parksData = results.features.map((feature) => {
-                        return {
-                            region: feature.attributes.REGION,
-                            count: feature.attributes.count
-                        };
-                    }).sort((a, b) => b.count - a.count);
-                }); */
                 //update regional stats
             },
             destroy() {
@@ -380,20 +373,12 @@
 <div class="app-header">
     <div>
         <h1>PARK-Or</h1>
-        <p class="desktop">
-            Where <em>every</em> park is a winner!
-        </p>
+        <p class="discover"><span class="desktop-hidden">Play & Discover | </span>Every Park's a Winner</p>
     </div>
-    <div class="centered">
-        <div class="esri-widget hidden filters" id="filterOptions"></div>
-    </div>
-    <div class="column buttons">
+    <div id="filterOptions"></div>
+    <div class="button-container">
         <div>
             <button id="playButton" type="button" disabled><img src={playSVG} alt="play icon" /></button>
-        </div>
-        
-        <div>
-            <button id="filterButton" type="button"><img src={filterSVG} alt="filter icon" /></button>
         </div>
     </div>
 </div>
@@ -410,19 +395,18 @@
 
     .app-header {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 1rem 0;
-        /*justify-content: center;*/
-        justify-content: space-around;
+        justify-content: space-between;
         text-align: center;
+        vertical-align: middle;
         margin: 0 2rem;
     }
 
-    .column {
+    .button-container {
         align-items: center;
+        text-align: center;
         display: block;
         padding: 0 1rem;
+        align-self: center;
     }
 
     .map-view {
@@ -430,22 +414,19 @@
         width: 100vw;
     }
 
-    .centered {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .hidden{
+    .desktop-hidden {
         display: none;
     }
 
-    .filters{
-        position: relative;
-        display: flex;
+    #filterOptions {
+        /* position: relative;
+        display: none;
         flex-wrap: wrap;
+        max-width: 50vw;
+        justify-content: center; */
+        font-size: small;
         max-width: 60vw;
-        justify-content: center;
+        background-color: #08363d;
     }
 
     .animate {
@@ -466,14 +447,27 @@
     @media only screen and (max-width: 600px) {
         .app-header{
             flex-direction: column;
+            justify-content:center;
+            align-items:center;
+            text-align: center;
         }
-        .desktop {
-            display: none;
+        .discover {
+            /* display: none; */
+            color: #c9551c;
+            text-shadow: #fff 0 0 .25px;
         }
-        .buttons{
+        .desktop-hidden {
+            display: inline;
+        }
+        .button-container{
             display: flex;
             flex-direction: row;
             justify-content: center;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        #filterOptions{
+            text-align: left;
         }
         
     }
