@@ -9,12 +9,12 @@
     import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
     import Graphic from "@arcgis/core/Graphic";
     import PopupTemplate from "@arcgis/core/PopupTemplate";
-    import CustomContent from "@arcgis/core/popup/content/CustomContent";
     import Point from "@arcgis/core/geometry/Point";
     import Home from "@arcgis/core/widgets/Home";
     import ScaleBar from "@arcgis/core/widgets/ScaleBar";
     import Locate from "@arcgis/core/widgets/Locate";
     import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";
+  import { not_equal } from "svelte/internal";
     
 
     export let centerText = ""; 
@@ -31,10 +31,10 @@
         let address = feature.graphic.attributes.ADDRESS;
         let amenities = amenitiesList.sort().join(", ");
         let url = feature.graphic.attributes.URL;
-
+        debugger;
         let parksPopup = "";
         //build popup html
-        if (url.length > 0) {
+        if (url != null) {
             parksPopup = `
                 <div style="text-align:left;">
                     <h6 class="font-weight: bolder;">${address}</h6>
