@@ -1,6 +1,5 @@
 <script>
     import playSVG from "./../assets/play-fill.svg";
-    import filterSVG from "./../assets/filter.svg";
     import { allParkAttributes, regionalStats } from "../data/stores";
 
     import Map from "@arcgis/core/Map";
@@ -13,9 +12,7 @@
     import Home from "@arcgis/core/widgets/Home";
     import ScaleBar from "@arcgis/core/widgets/ScaleBar";
     import Locate from "@arcgis/core/widgets/Locate";
-    import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";
-  import { not_equal } from "svelte/internal";
-    
+    import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";    
 
     export let centerText = ""; 
 
