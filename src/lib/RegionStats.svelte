@@ -7,9 +7,6 @@
         
     const unsubscribe = regionalStats.subscribe(value => {
         data = value;
-        //if(data.length > 0){
-        //createChart(data);
-        //}
     });
     
     onDestroy(() => {
@@ -21,7 +18,7 @@
 
 
 {#if data.length > 0}
-    <div class="chart-section desktop">
+    <div class="chart-section">
         <h3># Parks per Region</h3>
         <div class="chart">
         {#each data as d}
@@ -32,21 +29,17 @@
         {/each}
         </div>
     </div>
-{:else}
-    <h4>Loading...</h4>
 {/if}
 
 
 <style>
     .chart-section{
         margin: 0 auto;
-        width: 100vw;
+        width: 99vw;
         height: 30vh;
         position: relative;
         display: flex;
         flex-direction: column;
-        /*  justify-content: space-between;
-        align-items: center; */
     }
     .chart {
         display: flex;
@@ -63,9 +56,13 @@
 
 
     @media only screen and (max-width: 600px) {
-        .desktop {
-            display: none;
+        .chart-section {
+            margin: 0 4rem 20vh 4rem;
+            text-align: left;
         }
-        
+        .chart{
+            flex-direction: column;
+            text-align: left;
+        }
     }
 </style>

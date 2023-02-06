@@ -28,7 +28,6 @@
         let address = feature.graphic.attributes.ADDRESS;
         let amenities = amenitiesList.sort().join(", ");
         let url = feature.graphic.attributes.URL;
-        debugger;
         let parksPopup = "";
         //build popup html
         if (url != null) {
@@ -102,7 +101,7 @@
         // query parksLayer
         const attrQuery = parksLayer.createQuery();
         attrQuery.where = "STATUS = 'ACTIVE'";
-        attrQuery.outFields = ["OBJECTID", "NAME", "REGION", "RESTROOM", "BASEBALL", "BASKETBALL", "DOGPARK", "PICNICAREA", "PLAYGROUND", "SOCCER", "MULTIPURPOSEFIELD", "BOATING", "FISHING", "SKATE", "TENNIS", "ULTIMATEGOLF", "CYCLING"];
+        attrQuery.outFields = parkFields;
 
         const allParksDataQuery = await parksLayer.queryFeatures(attrQuery);
         const allParkAttrResults = await allParksDataQuery.features.map((feature) => {
@@ -124,6 +123,7 @@
                 PLAYGROUND: feature.attributes.PLAYGROUND,
                 MULTIPURPOSEFIELD: feature.attributes.MULTIPURPOSEFIELD,
                 SKATE: feature.attributes.SKATE,
+                AREA: feature.attributes.Shape__Area,
             };
         });
         //update parks data
@@ -165,6 +165,7 @@
             //results.features.length);
             let featureCount = results.features.length;
             if (featureCount > 0) {
+
                 let timeToRun = (featureCount > 30) ? Math.floor(results.features.length / 3) : featureCount; //seconds
                 //start timer
                 let timer = setInterval(() => {
@@ -267,12 +268,22 @@
             const parksLayerView = await view.whenLayerView(parksLayer);
             
             parksLayerView.when(() => {
+
+                const queryFeatureCount = async() => {
+                    const featureCount = await parksLayerView.queryFeatureCount();
+                    if(featureCount > 0){
+                        centerText = `<strong>${featureCount} Parks</strong>`;
+                    } else{
+                        centerText = `<strong>${featureCount} Parks Found. Recommend Reseting Filters.</strong>`;
+                    }
+                }
+
                 //populate filter select options from park fields
                 const filterSelect = document.getElementById("filterOptions");
                 let filterSelectHTML = '<fieldset><legend>Filter by Amenities</legend>';
                 const optionStyle = "display:inline-flex;align-items:center;"
                 const filterOptions = parkFields.sort().map((attribute) => {
-                    if(attribute !== "OBJECTID" && attribute !== "FACILITYSITEID" && attribute !== "NAME" && attribute !== "ADDRESS" && attribute !== "REGION" && attribute !== "URL")
+                    if(attribute !== "OBJECTID" && attribute !== "Shape__Area" && attribute !== "FACILITYSITEID" && attribute !== "NAME" && attribute !== "ADDRESS" && attribute !== "REGION" && attribute !== "URL")
                     return `<div style="${optionStyle}" class="filterOption">
                                 <input type="checkbox" id="${attribute}" name="interest" value="${attribute}" />
                                 <label for="${attribute}">${attribute}</label>
@@ -281,20 +292,6 @@
                 filterSelectHTML += filterOptions.join("");
                 filterSelectHTML += '</legend></fieldset><small><a href="#" id="resetFilterButton">Reset Filters</a></small>';
                 filterSelect.innerHTML = filterSelectHTML;
-                
-
-                //get reset button
-                const resetButton = document.getElementById("resetFilterButton");
-                //add event listener to filter button
-                resetButton.addEventListener("click", () => {
-                    //clear all inputs
-                    const filterInputs = document.querySelectorAll("input[name='interest']");
-                    for (const input of filterInputs) {
-                        // @ts-ignore
-                        input.checked = false;
-                    }                    
-                });
-
 
                 const filterParksLayer = (parksLayerView, filterInputs) => {
                     return () => {
@@ -307,9 +304,16 @@
                             parksLayerView.filter = {
                                 where: checkedInputsValuesQuery
                             };
+
+                            //update center text
+                            queryFeatureCount();
+                            
                         } else {
                             parksLayerView.filter = null;
+                            //update center text
+                            queryFeatureCount();
                         }
+
                     }
                 }
                 //add event listener to each filter input
@@ -317,6 +321,19 @@
                 for (const filterInput of filterInputs) {
                     filterInput.addEventListener('click', filterParksLayer(parksLayerView, filterInputs));
                 }
+
+                //get reset button
+                const resetButton = document.getElementById("resetFilterButton");
+                //add event listener to filter button
+                resetButton.addEventListener("click", () => {
+                    //clear all inputs
+                    const filterInputs = document.querySelectorAll("input[name='interest']");
+                    for (const input of filterInputs) {
+                        // @ts-ignore
+                        input.checked = false;
+                    }       
+                    filterParksLayer(parksLayerView, filterInputs)();          
+                });
 
                 //add event listener to play button
                 const playButton = document.getElementById("playButton");
