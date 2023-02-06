@@ -14,7 +14,7 @@
     import Locate from "@arcgis/core/widgets/Locate";
     import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";    
 
-    export let centerText = ""; 
+    export let parkNumberText = ""; 
 
     export let parkFields = [];
 
@@ -130,7 +130,7 @@
         $allParkAttributes = allParkAttrResults;
         
         //update center text
-        centerText = `<strong>${allParkAttrResults.length}</strong> Total <strong>Parks</strong>`;
+        parkNumberText = `<strong>${allParkAttrResults.length-1}</strong> Total <strong>Parks</strong>`;
 
         const statsQuery = parksLayer.createQuery();
         statsQuery.where = "STATUS = 'ACTIVE'";
@@ -262,21 +262,13 @@
         });
         /* view.watch("center", (center) => {
             const { latitude, longitude } = center;
-            centerText = `Lat: ${latitude.toFixed(2)} | Lon: ${longitude.toFixed(2)}`;
+            parkNumberText = `Lat: ${latitude.toFixed(2)} | Lon: ${longitude.toFixed(2)}`;
         }); */
+
         view.when(async () => {
             const parksLayerView = await view.whenLayerView(parksLayer);
             
             parksLayerView.when(() => {
-
-                const queryFeatureCount = async() => {
-                    const featureCount = await parksLayerView.queryFeatureCount();
-                    if(featureCount > 0){
-                        centerText = `<strong>${featureCount} Parks</strong>`;
-                    } else{
-                        centerText = `<strong>${featureCount} Parks Found. Recommend Reseting Filters.</strong>`;
-                    }
-                }
 
                 //populate filter select options from park fields
                 const filterSelect = document.getElementById("filterOptions");
@@ -304,14 +296,10 @@
                             parksLayerView.filter = {
                                 where: checkedInputsValuesQuery
                             };
-
-                            //update center text
-                            queryFeatureCount();
                             
                         } else {
                             parksLayerView.filter = null;
-                            //update center text
-                            queryFeatureCount();
+
                         }
 
                     }
@@ -344,6 +332,20 @@
                 
                 queryParksData(view, parksLayer);
             });
+
+            parksLayerView.watch("updating", (val) => {
+                if (!val) {
+                    // all layer views are done updating
+                    const updateParkNumberText = async() => {
+                        const featureCount = await parksLayerView.queryFeatureCount();
+                        parkNumberText = `<strong>${featureCount} Park Results</strong>`;
+                    }
+                    
+                    //update center text
+                    updateParkNumberText();
+                }
+            });
+            
         });
 
         // Create mapview widgets
@@ -399,8 +401,8 @@
 <div class="container">
     <div class="map-view" use:createMap />
 </div>
-{#if centerText}
-    <div class="centerText">{@html centerText}</div>
+{#if parkNumberText}
+    <div class="park-count-text">{@html parkNumberText}</div>
 {/if}
 <p id="arrow" class="animate">&downarrow;</p>
 
@@ -426,6 +428,11 @@
     .map-view {
         height: 70vh;
         width: 100vw;
+    }
+
+    .park-count-text {
+        text-align: left;
+        margin: 0.5rem 2rem;
     }
 
     .desktop-hidden {
